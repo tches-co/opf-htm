@@ -1,4 +1,6 @@
 from nupic.frameworks.opf.common_models.cluster_params import getScalarMetricWithTimeOfDayAnomalyParams
+import pprint
+
 
 def get_params(min_val, max_val):
     """
@@ -14,3 +16,9 @@ def get_params(min_val, max_val):
     
     return params
 
+def main():
+    pp = pprint.PrettyPrinter(indent = 1)
+    pp.pprint(get_params(-100,100))
+
+if __name__ == "__main__":
+    main()
