@@ -1,5 +1,7 @@
 from nupic.frameworks.opf.common_models.cluster_params import getScalarMetricWithTimeOfDayAnomalyParams
 import pprint
+import yaml
+import json
 
 
 def get_params(min_val, max_val):
@@ -14,6 +16,8 @@ def get_params(min_val, max_val):
         minVal = min_val, 
         maxVal = max_val)  
     
+    with open('parameters.json','w') as outfile:
+        json.dump(params, outfile, indent = 4)
     return params
 
 def main():
