@@ -86,7 +86,7 @@
             "tmEnable": true, 
             "clEnable": false, 
             "spEnable": true, 
-            "inferenceType": "NontemporalAnomaly"
+            "inferenceType": "TemporalAnomaly"
         }
     }
 }
