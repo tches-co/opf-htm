@@ -1,6 +1,7 @@
 from nupic.frameworks.opf.model_factory import ModelFactory
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_params():
     parameters = open('parameters.json',)
@@ -23,6 +24,10 @@ def run_model(model, a, b):
         inputRecords['c1'] = float(value)
         result = model.run(inputRecords)
         anom_scores.append(result.inferences["anomalyScore"])
+    
+    plt.plot(np.arange(np.size(anom_scores)), anom_scores)
+    plt.show()
+
 
 
 
