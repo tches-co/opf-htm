@@ -9,17 +9,20 @@ def get_params():
 
 def create_model(parameters):
     model = ModelFactory.create(modelConfig = parameters["modelConfig"])
+    model.enableLearning()
+    model.enableInference(parameters["inferenceArgs"])
     return model
 
 def run_model(model, a, b):
     signal = np.load("./signs/sign.npy")
     signal = signal[a:b,1]
- 
+    anom_scores = []
+
     for value in signal:
         inputRecords={}
         inputRecords['c1'] = float(value)
         result = model.run(inputRecords)
-        print(result.inferences)
+        anom_scores.append(result.inferences["anomalyScore"])
 
 
 
