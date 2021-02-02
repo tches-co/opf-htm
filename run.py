@@ -24,6 +24,11 @@ def create_model(parameters):
     # the classifier. 
     return model
 
+def open_signs():
+    """Return the signs
+    """
+    return np.load("./signs/sign.npy")
+
 def run_model(model, a, b, save = True):
     """Runs the HTM model and generates the anomaly scores"
     :model: the model created with create_model()
@@ -33,7 +38,7 @@ def run_model(model, a, b, save = True):
     """
 
     ######################### open the signs ###########################################
-    signal = np.load("./signs/sign.npy")
+    signal = open_signs()
     signal = signal[a:b,1]
     #-----------------------------------------------------------------------------------
 
