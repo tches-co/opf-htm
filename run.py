@@ -15,7 +15,7 @@ def create_model(parameters):
     model.enableInference(parameters["inferenceArgs"])
     return model
 
-def run_model(model, a, b):
+def run_model(model, a, b, save = True):
     signal = np.load("./signs/sign.npy")
     signal = signal[a:b,1]
 
@@ -38,12 +38,19 @@ def run_model(model, a, b):
         anom_scores.append(result.inferences["anomalyScore"])
         anom_likelihood.append(current_likelihood)
         anom_loglikelihood.append(current_loglikelihood)
+    
+    if save == True:
+        np.savetxt("anom_score.txt",anom_scores,delimiter=',')
+
+        np.savetxt("anom_likelihood.txt",anom_likelihood,delimiter=',')
+
+        np.savetxt("anom_logscore.txt", anom_loglikelihood,delimiter=',')
 
 def main():
     PARAMS_ = get_params()
     model = create_model(PARAMS_)
     a, b = (7160000, 7180000)
-    run_model(model, a, b)
+    run_model(model, a, b, save = True)
 
 
 
