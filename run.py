@@ -5,17 +5,32 @@ import matplotlib.pyplot as plt
 from nupic.algorithms.anomaly_likelihood import AnomalyLikelihood
 
 def get_params():
+    """
+    Opens the .json params file
+    """
     parameters = open('parameters.json',)
     parameters = json.load(parameters)
     return parameters
 
 def create_model(parameters):
+    """
+    Creates the HTM model.
+    :parameters: the .json parameters created with params.py and opened by create_model()
+    """
+
     model = ModelFactory.create(modelConfig = parameters["modelConfig"])
     model.enableLearning()
     model.enableInference(parameters["inferenceArgs"])
     return model
 
 def run_model(model, a, b, save = True):
+    """
+    Runs the HTM model and generates the anomaly scores"
+    :model: the model created with create_model()
+    :a: the beginning of the anylized signal
+    :b: the end of the anylized signal
+    :save: if True then the anomalies output will be saved as .txt
+    """
     signal = np.load("./signs/sign.npy")
     signal = signal[a:b,1]
 
@@ -48,6 +63,9 @@ def run_model(model, a, b, save = True):
 
 
 def plot():
+    """
+    Plots the anomaly score and likelihood in the same window. 
+    """
 
     anom_scores = np.genfromtxt("anom_score.txt", delimiter = ",")
     anom_scores = [anom_scores[i] for i in range(np.size(anom_scores)) if i%2==0]
