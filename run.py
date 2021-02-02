@@ -46,11 +46,26 @@ def run_model(model, a, b, save = True):
 
         np.savetxt("anom_logscore.txt", anom_loglikelihood,delimiter=',')
 
+
+def plot():
+
+    anom_scores = np.genfromtxt("anom_score.txt", delimiter = ",")
+    anom_scores = [anom_scores[i] for i in range(np.size(anom_scores)) if i%2==0]
+ 
+
+    anom_loglikelihood = np.genfromtxt("anom_logscore.txt", delimiter = ",")
+
+    plt.plot(np.arange(np.size(anom_scores)), anom_scores)
+    plt.plot(np.arange(np.size(anom_scores)), anom_loglikelihood, color = 'red')
+    plt.show()
+
+
 def main():
     PARAMS_ = get_params()
     model = create_model(PARAMS_)
     a, b = (7160000, 7180000)
     run_model(model, a, b, save = True)
+    plot()
 
 
 
