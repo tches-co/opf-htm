@@ -77,19 +77,37 @@ def run_model(model, a, b, save = True):
 
     ################# save the anomaly values #######################################
     if save == True:
-        np.savetxt("anom_score.txt",anom_scores,delimiter=',')
+        np.savetxt("anom_score_2.txt",anom_scores,delimiter=',')
 
-        np.savetxt("anom_likelihood.txt",anom_likelihood,delimiter=',')
+        np.savetxt("anom_likelihood_2.txt",anom_likelihood,delimiter=',')
 
-        np.savetxt("anom_logscore.txt", anom_loglikelihood,delimiter=',')
+        np.savetxt("anom_logscore_2.txt", anom_loglikelihood,delimiter=',')
     #--------------------------------------------------------------------------------
 
-def plot():
+def plot(a,b):
     """Plots the anomaly score and likelihood in the same window. 
     """
+    ############## open the sign and vector time .txt files ##########################
+    scalar_1 = open_signs()[a:b,1]
+    time_vect = open_signs()[a:b,0]
+    #---------------------------------------------------------------------------------
+
     ################# open the anom score and logscore .txt ##########################
     anom_scores = np.genfromtxt("anom_score.txt", delimiter = ",")
     anom_loglikelihood = np.genfromtxt("anom_logscore.txt", delimiter = ",")
+    #---------------------------------------------------------------------------------
+    
+    ############ plot the anomaly likelihood and the signal in the same plot #########
+    fig, axs = plt.subplots(2)                    # declare the plot 
+
+    axs[0].set_ylabel("y position")
+    axs[0].plot(time_vect,scalar_1,'o',color="black")
+
+    axs[1].set_ylabel("anomaly loglikelihood")
+    axs[1].plot(time_vect, anom_loglikelihood, color = "blue")
+    axs[1].set_xlabel("time(ms)")
+
+    plt.show()
     #--------------------------------------------------------------------------------
 
     ################# plot both anomalies types #####################################
@@ -99,11 +117,11 @@ def plot():
     #--------------------------------------------------------------------------------
 
 def main():
-    PARAMS_ = get_params() # get the params
-    model = create_model(PARAMS_) # creates the model
-    a, b = (7160000, 7162000) # define the index of the values which will be ran over by the HTM
-    run_model(model, a, b, save = True) # run the model
-    plot() # plot the data
+    #PARAMS_ = get_params() # get the params
+    #model = create_model(PARAMS_) # creates the model
+    a, b = (7160000, 7300000) # define the index of the values which will be ran over by the HTM
+    #run_model(model, a, b, save = True) # run the model
+    plot(a,b) # plot the data
 
 
 
