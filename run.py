@@ -24,22 +24,69 @@ def create_model(parameters):
     # the classifier. 
     return model
 
+
+def aggregate_(a,b):
+    """
+    Aggregate the data by doing the mean for each indice values divisible by 3 and the next 2 values.
+    It returns:
+        :scalar_1: the c1 values list
+        :time_vect: the time vector list
+    """
+    signs = open_signs()[a:b,0:2]
+
+    scalar_1  = []
+    time_vect = []
+    for i, v in enumerate(signs[:,1]): #iterates over the signs
+
+        try:             ## firstly we try iterating over the whole data doing the mean for the next 2 positions every i.
+            if i%3 == 0: ## take 1 every 3 positions and then take and average of i and the 2 subsequent values.
+                scalar = (signs[i,1] + signs[i+1,1] + signs[i+2,1])/3   # taking the average of the i and the next 2 values
+                time_ = signs[i,0]  # saving each i "time" to make the plot easier. Add the values, we pick 1 every 3 datapoints.
+
+                scalar_1.append(scalar) # we append those values in each array
+                time_vect.append(time_)   
+
+        except IndexError: # then, if we can't reach the i+2 index, then we try to reach only the i+1 value
+            try: 
+                scalar = (signs[i,1] + signs[i+1,1])/2
+                time_ = signs[i,0]
+
+                scalar_1.append(scalar)
+                time_vect.append(time_)
+                
+
+            except IndexError: # then, if we can't reach the i+1 index, we only use the i itself - neither the i+1 nor the i+2
+                scalar = signs[i,1] 
+                time_ = signs[i,0]
+
+                scalar_1.append(scalar)
+                time_vect.append(time_)
+            
+    return scalar_1, time_vect
+
+
 def open_signs():
     """Return the signs
     """
     return np.load("./signs/sign.npy")
 
-def run_model(model, a, b, save = True):
-    """Runs the HTM model and generates the anomaly scores"
-    :model: the model created with create_model()
-    :a: the beginning of the anylized signal
-    :b: the end of the anylized signal
-    :save: if True then the anomalies output will be saved as .txt
+def run_model(model, a, b, save = True, aggregate = False):
+    """Runs the HTM model and generates the anomaly scores.
+    Arguments:
+        :model: the model created with create_model()
+        :a: the beginning of the anylized signal
+        :b: the end of the anylized signal
+        :save: if True then the anomalies output will be saved as .txt
     """
 
     ######################### open the signs ###########################################
-    signal = open_signs()
-    signal = signal[a:b,1]
+    if aggregate == True:
+        signal, time_vect = aggregate_(a,b)
+        print("the size of signal is: {i}".format(i=np.size(signal)))
+
+    else:
+        signal = open_signs()
+        signal = signal[a:b,1]
     #-----------------------------------------------------------------------------------
 
     ##################### declare the anomalies lists ##################################
@@ -55,7 +102,7 @@ def run_model(model, a, b, save = True):
 
     for value in signal:# iterate over each value in the signal array
         
-        ############ declare the dict which will be passed to the model ##############
+        ############ declare the dict which will be passed to the model ###############
         inputRecords={}                   # the model only accepts data in a specific dict format ...                
         inputRecords['c1'] = float(value) # this format is shown here: 
         #-------------------------------------------------------------------------------
@@ -77,34 +124,37 @@ def run_model(model, a, b, save = True):
 
     ################# save the anomaly values #######################################
     if save == True:
-        np.savetxt("anom_score_2.txt",anom_scores,delimiter=',')
+        np.savetxt("anom_score_agg.txt",anom_scores,delimiter=',')
 
-        np.savetxt("anom_likelihood_2.txt",anom_likelihood,delimiter=',')
+        np.savetxt("anom_likelihood_agg.txt",anom_likelihood,delimiter=',')
 
-        np.savetxt("anom_logscore_2.txt", anom_loglikelihood,delimiter=',')
+        np.savetxt("anom_logscore_agg.txt", anom_loglikelihood,delimiter=',')
     #--------------------------------------------------------------------------------
 
-def plot(a,b):
+def plot(a,b,  aggregate = False):
     """Plots the anomaly score and likelihood in the same window. 
     """
     ############## open the sign and vector time .txt files ##########################
-    scalar_1 = open_signs()[a:b,1]
-    time_vect = open_signs()[a:b,0]
+    if aggregate == True:
+        scalar_1, time_vect = aggregate_(a,b)
+    else:
+        scalar_1 = open_signs()[a:b,1]
+        time_vect = open_signs()[a:b,0]
     #---------------------------------------------------------------------------------
 
     ################# open the anom score and logscore .txt ##########################
-    anom_scores = np.genfromtxt("anom_score.txt", delimiter = ",")
-    anom_loglikelihood = np.genfromtxt("anom_logscore.txt", delimiter = ",")
+    anom_scores = np.genfromtxt("anom_score_agg.txt", delimiter = ",")
+    anom_loglikelihood = np.genfromtxt("anom_logscore_agg.txt", delimiter = ",")
     #---------------------------------------------------------------------------------
     
     ############ plot the anomaly likelihood and the signal in the same plot #########
     fig, axs = plt.subplots(2)                    # declare the plot 
 
     axs[0].set_ylabel("y position")
-    axs[0].plot(time_vect,scalar_1,'o',color="black")
+    axs[0].plot(time_vect,scalar_1,'--bo',color="black")
 
     axs[1].set_ylabel("anomaly loglikelihood")
-    axs[1].plot(time_vect, anom_loglikelihood, color = "blue")
+    axs[1].plot(time_vect, anom_scores, color = "blue")
     axs[1].set_xlabel("time(ms)")
 
     plt.show()
@@ -117,11 +167,12 @@ def plot(a,b):
     #--------------------------------------------------------------------------------
 
 def main():
-    #PARAMS_ = get_params() # get the params
-    #model = create_model(PARAMS_) # creates the model
-    a, b = (7160000, 7300000) # define the index of the values which will be ran over by the HTM
-    #run_model(model, a, b, save = True) # run the model
-    plot(a,b) # plot the data
+    PARAMS_ = get_params() # get the params
+    model = create_model(PARAMS_) # creates the model
+    a, b = (7090000, 7280000) # define the index of the values which will be ran over by the HTM
+    run_model(model, a, b, save = True, aggregate = True) # run the model
+    plot(a,b, aggregate = True) # plot the data
+
 
 
 
