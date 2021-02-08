@@ -124,11 +124,11 @@ def run_model(model, a, b, save = True, aggregate = False):
 
     ################# save the anomaly values #######################################
     if save == True:
-        np.savetxt("anom_score_agg.txt",anom_scores,delimiter=',')
+        np.savetxt("anom_score_training.txt",anom_scores,delimiter=',')
 
-        np.savetxt("anom_likelihood_agg.txt",anom_likelihood,delimiter=',')
+        np.savetxt("anom_likelihood_training.txt",anom_likelihood,delimiter=',')
 
-        np.savetxt("anom_logscore_agg.txt", anom_loglikelihood,delimiter=',')
+        np.savetxt("anom_logscore_training.txt", anom_loglikelihood,delimiter=',')
     #--------------------------------------------------------------------------------
 
 def plot(a,b,  aggregate = False):
@@ -143,8 +143,8 @@ def plot(a,b,  aggregate = False):
     #---------------------------------------------------------------------------------
 
     ################# open the anom score and logscore .txt ##########################
-    anom_scores = np.genfromtxt("anom_score_agg.txt", delimiter = ",")
-    anom_loglikelihood = np.genfromtxt("anom_logscore_agg.txt", delimiter = ",")
+    anom_scores = np.genfromtxt("anom_score_training.txt", delimiter = ",")
+    anom_loglikelihood = np.genfromtxt("anom_logscore_training.txt", delimiter = ",")
     #---------------------------------------------------------------------------------
     
     ############ plot the anomaly likelihood and the signal in the same plot #########
@@ -166,12 +166,30 @@ def plot(a,b,  aggregate = False):
     plt.show()
     #--------------------------------------------------------------------------------
 
+def training_(model, c, d):
+    training_1, time_vect_training = aggregate_(c,d) # get the aggregated data for training
+    
+    n = 10
+    for count in range(n):
+        if count == n-1:
+            run_model(model, c, d, save= True, aggregate= True)
+        else:
+            run_model(model, c, d, save=False, aggregate = True)
+    return c,d 
+
+
+
+
+
+
 def main():
     PARAMS_ = get_params() # get the params
     model = create_model(PARAMS_) # creates the model
-    a, b = (7090000, 7280000) # define the index of the values which will be ran over by the HTM
-    run_model(model, a, b, save = True, aggregate = True) # run the model
-    plot(a,b, aggregate = True) # plot the data
+    #a, b = (7090000, 7280000) # define the index of the values which will be ran over by the HTM
+    #run_model(model, a, b, save = True, aggregate = True) # run the model
+    c, d = (7090000, 7100000)
+    training_(model, c, d)
+    plot(c,d, aggregate = True) # plot the data
 
 
 
