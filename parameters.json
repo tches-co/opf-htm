@@ -28,7 +28,7 @@
                 "encoders": {
                     "c1": {
                         "name": "c1", 
-                        "resolution": 1.0769230769230769,
+                        "resolution": 1.5384615384615385,
                         "seed": 42, 
                         "fieldname": "c1", 
                         "type": "RandomDistributedScalarEncoder"

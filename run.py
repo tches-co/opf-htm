@@ -70,7 +70,7 @@ def open_signs():
     """
     return np.load("./signs/sign.npy")
 
-def run_model(model, a, b, save = True, aggregate = False):
+def run_model(model, a, b, save = True, aggregate = False, string = ''):
     """Runs the HTM model and generates the anomaly scores.
     Arguments:
         :model: the model created with create_model()
@@ -124,11 +124,11 @@ def run_model(model, a, b, save = True, aggregate = False):
 
     ################# save the anomaly values #######################################
     if save == True:
-        np.savetxt("anom_score_training.txt",anom_scores,delimiter=',')
+        np.savetxt("anom_score_"+ string + ".txt",anom_scores,delimiter=',')
 
-        np.savetxt("anom_likelihood_training.txt",anom_likelihood,delimiter=',')
+        np.savetxt("anom_likelihood_" + string + ".txt",anom_likelihood,delimiter=',')
 
-        np.savetxt("anom_logscore_training.txt", anom_loglikelihood,delimiter=',')
+        np.savetxt("anom_logscore_" + string + ".txt", anom_loglikelihood,delimiter=',')
     #--------------------------------------------------------------------------------
 
 def plot(a,b,  aggregate = False):
@@ -143,8 +143,8 @@ def plot(a,b,  aggregate = False):
     #---------------------------------------------------------------------------------
 
     ################# open the anom score and logscore .txt ##########################
-    anom_scores = np.genfromtxt("anom_score_training.txt", delimiter = ",")
-    anom_loglikelihood = np.genfromtxt("anom_logscore_training.txt", delimiter = ",")
+    anom_scores = np.genfromtxt("anom_score_after_training.txt", delimiter = ",")
+    anom_loglikelihood = np.genfromtxt("anom_logscore_after_training.txt", delimiter = ",")
     #---------------------------------------------------------------------------------
     
     ############ plot the anomaly likelihood and the signal in the same plot #########
@@ -153,7 +153,7 @@ def plot(a,b,  aggregate = False):
     axs[0].set_ylabel("y position")
     axs[0].plot(time_vect,scalar_1,'--bo',color="black")
 
-    axs[1].set_ylabel("anomaly loglikelihood")
+    axs[1].set_ylabel("anomaly score")
     axs[1].plot(time_vect, anom_scores, color = "blue")
     axs[1].set_xlabel("time(ms)")
 
@@ -166,30 +166,27 @@ def plot(a,b,  aggregate = False):
     plt.show()
     #--------------------------------------------------------------------------------
 
-def training_(model, c, d):
+def training_(model, c, d, save = False):
     training_1, time_vect_training = aggregate_(c,d) # get the aggregated data for training
     
     n = 10
     for count in range(n):
-        if count == n-1:
-            run_model(model, c, d, save= True, aggregate= True)
-        else:
-            run_model(model, c, d, save=False, aggregate = True)
-    return c,d 
-
-
-
-
+        txt = "training_" + "{i}".format(i=count) 
+        run_model(model, c, d, save= False, aggregate= True, string = txt)
+    
+    return model
 
 
 def main():
     PARAMS_ = get_params() # get the params
     model = create_model(PARAMS_) # creates the model
-    #a, b = (7090000, 7280000) # define the index of the values which will be ran over by the HTM
-    #run_model(model, a, b, save = True, aggregate = True) # run the model
+    print(model)
     c, d = (7090000, 7100000)
-    training_(model, c, d)
-    plot(c,d, aggregate = True) # plot the data
+    model = training_(model, c, d, save = False)
+    a, b = (7090000, 7400000) # define the index of the values which will be ran over by the HTM
+    model.save('C:/Users/Usuario/Desktop/HTM/OPF/saveModel')
+    run_model(model, a, b, save = True, aggregate = True, string='after_training') # run the model
+    plot(a,b, aggregate = True) # plot the data
 
 
 

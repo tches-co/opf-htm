@@ -2,3 +2,5 @@ signs
 *.pyc
 *.txt
 statistic.py
+saveModel
+store_anomaly
