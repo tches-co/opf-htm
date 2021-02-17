@@ -13,7 +13,8 @@ def get_params():
 
 def create_model(parameters):
     """Creates the HTM model and returns it.
-    :parameters: the .json parameters created with params.py and opened by create_model()
+    Arguments:
+        :parameters: the .json parameters created with params.py and opened by create_model()
     """
 
     model = ModelFactory.create(modelConfig = parameters["modelConfig"])        # creates the HTM model with the parameters["modelConfig"] parameters
@@ -38,7 +39,7 @@ def aggregate_(a,b):
 
     scalar_1  = []
     time_vect = []
-    for i, v in enumerate(signs[:,1]): #iterates over the signs
+    for i, v in enumerate(signs[:,1]):                                  # iterates over the signs. The "v" isn't usefull.
 
         try:                                                            # firstly we try iterating over the whole data doing the mean for the next 2 positions every i.
             if i%3 == 0:                                                # take 1 every 3 positions and then take and average of i and the 2 subsequent values.
@@ -135,7 +136,7 @@ def run_model(model, a, b, save = True, aggregate = False, string = ''):
         np.savetxt("anom_logscore_" + string + ".txt", anom_loglikelihood,delimiter=',')
     #--------------------------------------------------------------------------------
 
-def plot(a,b,  aggregate = False):
+def plot(a,b,  aggregate = False, string = ''):
     """Plots the anomaly score and likelihood in the same window. 
     Arguments:
 
@@ -152,8 +153,8 @@ def plot(a,b,  aggregate = False):
     #---------------------------------------------------------------------------------
 
     ################# open the anom score and logscore .txt ##########################
-    anom_scores = np.genfromtxt("anom_score_after_training.txt", delimiter = ",")
-    anom_loglikelihood = np.genfromtxt("anom_logscore_after_training.txt", delimiter = ",")
+    anom_scores = np.genfromtxt("anom_score_"+ string + ".txt", delimiter = ",")
+    anom_loglikelihood = np.genfromtxt("anom_logscore_" + string + ".txt", delimiter = ",")
     #---------------------------------------------------------------------------------
     
     ############ plot the anomaly likelihood and the signal in the same plot #########
@@ -201,19 +202,21 @@ def training_(model, c, d, save = False):
 
 def main():
 
-    PARAMS_ = get_params()                                                          # get the params
-    model = create_model(PARAMS_)                                                   # creates the model
+    PARAMS_ = get_params()                                                                 # get the params
+    model = create_model(PARAMS_)                                                          # creates the model
 
-    c, d = (7090000, 7100000)                                                       # define the index of the values which the model will be trained.
-    model = training_(model, c, d, save = False)                                    # train the model 
+    c, d = (7090000, 7100000)                                                              # define the index of the values which the model will be trained.
+    model = training_(model, c, d, save = False)                                           # train the model 
 
-    a, b = (7090000, 7400000)                                                       # define the index of the values which will be ran over by the HTM
-    model.save('C:/Users/Usuario/Desktop/HTM/OPF/saveModel')                        # save the model
-    run_model(model, a, b, save = True, aggregate = True, string='after_training')  # run the model
+    model.save('C:/Users/Usuario/Desktop/HTM/OPF/saveModel')                               # save the model
+    model = ModelFactory.loadFromCheckpoint('C:/Users/Usuario/Desktop/HTM/OPF/saveModel')  # load the model
 
-    plot(a,b, aggregate = True)                                                     # plot the data
+    a, b = (14500000, 14650000)                                                            # define the index of the values which will be ran over by the HTM
 
+    most_used_string = ['after_training', 'training_1','training_2','after_load']
+    run_model(model, a, b, save = True, aggregate = True, string='after_load')             # run the model
 
+    plot(a,b, aggregate = True, string = 'after_load')                                                            # plot the data
 
 
 if __name__ == '__main__':
