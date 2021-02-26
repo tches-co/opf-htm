@@ -26,6 +26,13 @@
             "sensorParams": {
                 "sensorAutoReset": null, 
                 "encoders": {
+                    "_classifierInput": { "classifierOnly": true,
+                        "resolution": 1.5384615384615385,
+                        "seed": 42, 
+                        "fieldname": "c1",
+                        "name": "_classifierInput",
+                        "type": "RandomDistributedScalarEncoder"
+                    },
                     "c1": {
                         "name": "c1", 
                         "resolution": 1.5384615384615385,
@@ -84,7 +91,7 @@
                 "verbosity": 0
             }, 
             "tmEnable": true, 
-            "clEnable": false, 
+            "clEnable": true, 
             "spEnable": true, 
             "inferenceType": "TemporalAnomaly"
         }
