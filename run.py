@@ -101,12 +101,15 @@ def run_model(model, a, b, save = True, aggregate = False, string = ''):
     #-----------------------------------------------------------------------------------
 
     ##################### declare the predicted list ###################################
-    _predictions = []
-    _predictions.append(0)                                                          # as this prediction is always made 1 step ahead, then the first value predicted will be ...
-                                                                                    # the prediction of the index with number 1, therefore doesn't exist a prediction of the 0 ...
-                                                                                    # index. The same problem occurs with the last signal, because it will predict one more ...
-                                                                                    # step ahead, this means that after seen the last signal "A", it will predict "A+1" even it doesnt ...
-                                                                                    # having a matching value in the signal array.
+    predictions_1 = []
+    predictions_5 = []
+    predictions_1.append(0)
+    for i in range(5):
+        predictions_5.append(0)                                             # as this prediction is always made 1 step ahead, then the first value predicted will be ...
+                                                                            # the prediction of the index with number 1, therefore doesn't exist a prediction of the 0 ...
+                                                                            # index. The same problem occurs with the last signal, because it will predict one more ...
+                                                                            # step ahead, this means that after seen the last signal "A", it will predict "A+1" even it doesnt ...
+                                                                            # having a matching value in the signal array.
     #-----------------------------------------------------------------------------------
 
     ################ declare the Anom likelihood class #################################
@@ -130,9 +133,9 @@ def run_model(model, a, b, save = True, aggregate = False, string = ''):
         current_loglikelihood = likelihood.computeLogLikelihood(current_likelihood)
         #--------------------------------------------------------------------------------
         ################################ PREDICTIONS ####################################
-        bestPredictions = result.inferences["multiStepBestPredictions"]             # take the  inferences dict
-        bestPredictions = bestPredictions[1]                                        # obtain the predicted value from infereces dict
-        _predictions.append(bestPredictions)                                        # append the value to the _predict array   
+        bestPredictions = result.inferences["multiStepBestPredictions"]                                      # obtain the predicted value from infereces dict
+        predictions_1.append(bestPredictions[1])
+        predictions_5.append(bestPredictions[5])                                         # append the value to the _predict array   
         
         #--------------------------------------------------------------------------------
 
@@ -143,12 +146,12 @@ def run_model(model, a, b, save = True, aggregate = False, string = ''):
         anom_loglikelihood.append(current_loglikelihood)
         #--------------------------------------------------------------------------------
         ################# print the input and prediction, for debugging purposes ########
-        if counter % 70 == 0:
-            print("Actual input [%d]: %f" % (counter, value))
-            print("Best prediction of [%d]: %s" % (counter+1,bestPredictions))
-            print("Input[%d]: %f" % (counter+1,signal[counter+1]))
-            print("Multi Step Predictions: %s" % (result.inferences["multiStepPredictions"]))
-            print("\n")
+        if counter % 1 == 0:
+            #print("Actual input [%d]: %f" % (counter, value))
+            print('prediction of [{0}]:(input) {1:8} (1-step) {2:8} (5-step) {3:8}'.format(counter, value, predictions_1[counter], predictions_5[counter]))
+            #print("Input[%d]: %f" % (counter+1,signal[counter+1]))
+            #print("Multi Step Predictions: %s" % (result.inferences["multiStepPredictions"]))
+            #print("\n")
         #--------------------------------------------------------------------------------
 
     ################# save the anomaly and prediction array #########################
@@ -160,7 +163,9 @@ def run_model(model, a, b, save = True, aggregate = False, string = ''):
 
         np.savetxt("anom_logscore_" + string + ".txt", anom_loglikelihood, delimiter = ',')
 
-        np.savetxt("anom_prediction_" + string + ".txt", _predictions, delimiter = ',')
+        np.savetxt("anom_prediction_1" + string + ".txt", predictions_1, delimiter = ',')
+
+        np.savetxt("anom_prediction_5" + string + ".txt", predictions_5, delimiter = ',')
     #--------------------------------------------------------------------------------
 
 def plot(a,b,  aggregate = False, string = ''):
@@ -182,7 +187,8 @@ def plot(a,b,  aggregate = False, string = ''):
     ################# open the anom score, logscore and predictions files ##########################
     anom_scores = np.genfromtxt("anom_score_"+ string + ".txt", delimiter = ",")
     anom_loglikelihood = np.genfromtxt("anom_logscore_" + string + ".txt", delimiter = ",")
-    prediction = np.genfromtxt("anom_prediction_" + string + ".txt", delimiter = ",")
+    prediction_1 = np.genfromtxt("anom_prediction_1" + string + ".txt", delimiter = ",")
+    prediction_5 = np.genfromtxt("anom_prediction_5" + string + ".txt", delimiter = ",")
     #---------------------------------------------------------------------------------
     
     ############ plot the anomaly likelihood and the signal in the same plot #########
@@ -207,17 +213,18 @@ def plot(a,b,  aggregate = False, string = ''):
 
     ################# plot the data and the prediction #####################################
 
-    if np.size(prediction)-1 == np.size(anom_scores):                       # testando o tamanho dos arrays. Por lógica...
-        print("o tamanho do array de predicao-1 e de anomalias eh igual")   # o primeiro elemento dos sinais (sign[0]) não possui uma predição - o classifier ...
-                                                                            # prediz, com base no sign[0] o sign[1]. Porém, o classifier também ...
-                                                                            # prediz um elemento a mais depois do final dos sinais. Por isso adiciono um "Nan" ...
-                                                                            # como primeiro elemento do array _predictions e também, na hora de plotar ...
-                                                                            # limito o array _predictions para que não utilize a última predição, pois não há ...
-                                                                            # input que corresponda a ela.
+    if np.size(prediction_1)-1 == np.size(anom_scores) and np.size(prediction_5)-5 == np.size(anom_scores):         # testando o tamanho dos arrays. Por lógica...
+        print("o tamanho do array de predicao-1 e de anomalias eh igual")                                           # o primeiro elemento dos sinais (sign[0]) não possui uma predição - o classifier ...
+                                                                                                                    # prediz, com base no sign[0] o sign[1]. Porém, o classifier também ...
+                                                                                                                    # prediz um elemento a mais depois do final dos sinais. Por isso adiciono um "Nan" ...
+                                                                                                                    # como primeiro elemento do array _predictions e também, na hora de plotar ...
+                                                                                                                    # limito o array _predictions para que não utilize a última predição, pois não há ...
+                                                                                                                    # input que corresponda a ela.
 
 
     plt.plot(np.arange(np.size(anom_scores)), scalar_1, "s", color = "black")
-    plt.plot(np.arange(np.size(prediction)-1), prediction[:-1],'v', color = 'red')
+    plt.plot(np.arange(np.size(prediction_1)-1), prediction_1[:-1],'v', color = 'red')
+    plt.plot(np.arange(np.size(prediction_5)-5), prediction_5[:-5],'o', color = 'blue')
     plt.show()
     #--------------------------------------------------------------------------------
 
@@ -256,10 +263,10 @@ def main():
     #model.save('C:/Users/Usuario/Desktop/HTM/OPF/saveModel_classifier')                                # save the model
     #model = ModelFactory.loadFromCheckpoint('C:/Users/Usuario/Desktop/HTM/OPF/saveModel_classifier')   # load the model
 
-    a, b = (14500000, 14535000)                                                                         # define the index of the values which will be ran over by the HTM
+    a, b = (14500000, 14505000)                                                                         # define the index of the values which will be ran over by the HTM
 
-    most_used_string = ['after_training', 'training_1','training_2','after_load', 'classifier_training']
-    run_model(model, a, b, save = True, aggregate = False, string='classifier_training')                # run the model
+    #most_used_string = ['after_training', 'training_1','training_2','after_load', 'classifier_training']
+    #run_model(model, a, b, save = True, aggregate = False, string='classifier_training')                # run the model
 
     plot( a, b, aggregate = False, string = 'classifier_training')                                      # plot the data
 

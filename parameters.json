@@ -1,7 +1,7 @@
 {
     "inferenceArgs": {
         "predictionSteps": [
-            1
+            1, 5
         ], 
         "predictedField": "c1", 
         "inputPredictedField": "auto"
@@ -67,7 +67,7 @@
             "clParams": {
                 "alpha": 0.035828933612158, 
                 "verbosity": 0, 
-                "steps": "1", 
+                "steps": "1,5", 
                 "regionName": "SDRClassifierRegion"
             }, 
             "tmParams": {
